@@ -19,24 +19,24 @@ import java.io.File;
 
 @SuppressWarnings("serial")
 public class MasterConfiguration extends ChimeraConfiguration {
-	//search
-//	public final static String SAFE_MODE_MAX_TIME = "safemode.maxTime";
+	// search
+	// public final static String SAFE_MODE_MAX_TIME = "safemode.maxTime";
 	public final static String SEARCH_MASTER_RPC_PORT = "master.rpc.port";
 	public final static String SEARCH_MASTER_RPC_HANDLER_COUNT = "master.rpc.handler.count";
 
 	public static String SEARCH_MAX_RECORD = "search.max.record";
 	public static String TIMEOUT_FOR_SEARCH = "search.timeout";
-//	public static String SEARCH_MIX_BUFFER_SIZE = "search.max.buffer_size";
+	// public static String SEARCH_MIX_BUFFER_SIZE = "search.max.buffer_size";
 	public static String MAX_TOP_FOR_ORDER = "search.max.top_for order";
 	public final static String META_URI = "meta.uri";
 
-	//load
-	  public final static String SAFE_MODE_MAX_TIME = "safemode.maxTime";
-	  public final static String MASTER_RPC_PORT = "master.rpc.port";
-	  public final static String MASTER_PRC_HANDLER_COUNT="master.rpc.handler.count";
-	  public final static String MASTER_HTTP_PORT="master.http.port";
-	
-	//search
+	// load
+	public final static String SAFE_MODE_MAX_TIME = "safemode.maxTime";
+	public final static String MASTER_RPC_PORT = "master.rpc.port";
+	public final static String MASTER_PRC_HANDLER_COUNT = "master.rpc.handler.count";
+	public final static String MASTER_HTTP_PORT = "master.http.port";
+
+	// search
 	public MasterConfiguration() {
 		super("/dplatform.server.master.properties");
 	}
@@ -49,17 +49,17 @@ public class MasterConfiguration extends ChimeraConfiguration {
 		return getInt(SEARCH_MASTER_RPC_PORT, 50101);
 	}
 
-//	public int getSafeModeMaxTime() {
-//		return getInt(SAFE_MODE_MAX_TIME);
-//	}
+	// public int getSafeModeMaxTime() {
+	// return getInt(SAFE_MODE_MAX_TIME);
+	// }
 
 	public int getSearchMaxRecord() {
-		return getInt(SEARCH_MAX_RECORD,100);
+		return getInt(SEARCH_MAX_RECORD, 100);
 	}
 
-//	public int getSearchMixBufferSize() {
-//		return getInt(SEARCH_MIX_BUFFER_SIZE, 1000);
-//	}
+	// public int getSearchMixBufferSize() {
+	// return getInt(SEARCH_MIX_BUFFER_SIZE, 1000);
+	// }
 
 	public int getSearchMasterHandlerCount() {
 		return getInt(SEARCH_MASTER_RPC_HANDLER_COUNT, 2000);
@@ -72,21 +72,21 @@ public class MasterConfiguration extends ChimeraConfiguration {
 	public String getMetaUri() {
 		return getProperty(META_URI);
 	}
-	
-	//load
+
+	// load
 	public int getMasterRpcPort() {
 		return getInt(MASTER_RPC_PORT, 50001);
 	}
-	
-	public int getRpcHandlerCount(){
+
+	public int getRpcHandlerCount() {
 		return getInt(MASTER_PRC_HANDLER_COUNT, 2000);
 	}
-	
+
 	public int getSafeModeMaxTime() {
 		return getInt(SAFE_MODE_MAX_TIME);
 	}
-	
-	public int getMasterHttPort(){
+
+	public int getMasterHttPort() {
 		return getInt(MASTER_HTTP_PORT, 50011);
 	}
 
