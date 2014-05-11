@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class ChimeraConstant {
-	public static final String MDSS_HOME = "MDSS_HOME";
+	public static final String HOMEDIR = "/home/chimera";
 	public static final int KATTA_DEPLOY_FETCH_INTERVAL = 200;
 	public static final String KATTA_SHARD_DELIMETER = "#";
 	public static final String KATTA_MULL = "MULL";
@@ -12,9 +12,9 @@ public class ChimeraConstant {
 	public static final String KATTA_ATATALL_NAME = "@@all";
 	public static final String KATTA_MATCHALL = KATTA_ATATALL_NAME + ":0";
 
-	public static final String KATTA_STAR = "*";
+	public static final String _STAR = "*";
 	public static final String KATTA_STATION = "station";
-	public static final String KATTA_COLON = ":";
+	public static final String _COLON = ":";
 	public static final String KATTA_INDEX = "index";
 	public static final String KATTA_ENABLE = "enable";
 	public static final String KATTA_TMP_SHARD_EXTENSION = "_tmp";
