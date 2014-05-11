@@ -145,7 +145,7 @@ public class DataPlatformNode {
 			MetaException, TException {
 		dataFolders = new ArrayList<String>();
 //		dataFolders.add(KattaConstant.digestFolder);
-		dataFolders.add(KattaConstant.shardFolder);
+		dataFolders.add(ChimeraConstant.shardFolder);
 //		dataFolders.add(KattaConstant.storeFileFolder);
 		for (Integer diskNum : diskNumToPath.keySet()) {
 			Device dev = new Device();
