@@ -8,7 +8,7 @@ public class ClientDemo {
 	public static void main(String[] args) throws LogInitializationException {
 		LogUtils.initLog4j();
 		try {
-			RPCClient client = new RPCClient("172.16.0.127",8081);
+			RPCClient client = new RPCClient("localhost",8080);
 			client.getThings("test","test");
 			client.getThingsResult("test");
 		} catch (Exception e) {

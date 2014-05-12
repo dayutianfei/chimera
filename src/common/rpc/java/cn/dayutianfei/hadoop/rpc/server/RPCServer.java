@@ -49,7 +49,7 @@ public class RPCServer {
 	}
 
 	public RPCServer(ChimeraConfiguration configuration) throws FileNotFoundException, UnknownHostException {
-		_nodeName = NetUtils.getHostname() + ":" + "8080";
+		_nodeName = "localhost" + ":" + "8080";
 		System.out.println(_nodeName);
 		this._rpcServerport = 8080;
 		this._rpcHandlerCount= 20;
@@ -69,11 +69,11 @@ public class RPCServer {
 		try {
 			// start RPC Server
 			Class<?> serverClass = ClassUtil.forName("cn.dayutianfei.hadoop.rpc.server.RPCHandler", IRPCHandler.class);// iie.mdss.server.master.MasterRpcServer
-			IRPCHandler _server = (IRPCHandler) ClassUtil.newInstance(serverClass);
+			IRPCHandler _handler = (IRPCHandler) ClassUtil.newInstance(serverClass);
 
-			LOG.info("starting rpc server with server class = " + _server.getClass().getCanonicalName());
+			LOG.info("starting rpc server with server class = " + _handler.getClass().getCanonicalName());
 
-			this._rpcServer = startRPCServer(NetUtils.getHostname(), this._rpcServerport, _server, _rpcHandlerCount);
+			this._rpcServer = startRPCServer("localhost", this._rpcServerport, _handler, _rpcHandlerCount);
 		} catch (Exception e) {
 			LOG.error("error", e);
 		}

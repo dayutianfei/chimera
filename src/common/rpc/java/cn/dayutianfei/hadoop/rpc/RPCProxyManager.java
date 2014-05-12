@@ -85,7 +85,6 @@ private final Map<String, VersionedProtocol> node2ProxyMap = new ConcurrentHashM
     LOG.debug(String.format("Created a proxy %s for %s:%s %s", Proxy.getInvocationHandler(proxy), hostName, port,
             inetSocketAddress));
     node2ProxyMap.put(nodeName, proxy);
-    System.out.println(nodeName);
     return proxy;
   }
 

@@ -32,27 +32,6 @@ public class RPCProxy {
 
 	private List<String> nodes;
 	private RPCProxyManager proxyManager;
-	/******* search ********/
-	private static Method getMetaDataResult_METHOD = null;
-	private static Method getKVResult_METHOD = null;
-
-	static {
-		try {
-			// search
-			getMetaDataResult_METHOD = IRPCHandler.class.getMethod("getMetaDataResultBySQL", new Class[] { String.class });
-			getKVResult_METHOD = IRPCHandler.class.getMethod("getMetaDataResultByKV", new Class[] { String.class, String.class });
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException("Could not find methods in IMasterRPCServer!");
-		}
-	}
-
-	public String getThingsDone(String sql) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		return (String)broadtoMaster(getMetaDataResult_METHOD, sql);
-	}
-
-	public void getThings(String tableSpace, String key) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		broadtoMaster(getKVResult_METHOD, tableSpace, key);
-	}
 
 	public RPCProxy(List<String> masterlist, ChimeraConfiguration _clientConfiguration, Configuration hadoopConf)
 	{
@@ -74,44 +53,6 @@ public class RPCProxy {
 		if (!createProxyOk) {
 			LOG.debug("Create node proxy false");
 		}
-	}
-
-	public Object broadtoMaster(Method method, Object... args) throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-
-		VersionedProtocol proxy = null;
-		for (VersionedProtocol p : proxyManager.getProxys()) {
-			if (p != null) {
-				proxy = p;
-				break;
-			}
-		}
-		if (proxy == null) {
-			LOG.debug("no master is availiable");
-		}
-		if (method == null || args == null) {
-			throw new IllegalArgumentException("Null method or args!");
-		}
-
-		// method types
-		Class<?>[] types = method.getParameterTypes();
-		if (args.length != types.length) {
-			throw new IllegalArgumentException("Wrong number of args: found " + args.length + ", expected " + types.length + "!");
-		}
-		for (int i = 0; i < args.length; i++) {
-			if (args[i] != null) {
-				Class<?> from = args[i].getClass();
-				Class<?> to = types[i];
-				if (!to.isAssignableFrom(from) && !(from.isPrimitive() || to.isPrimitive())) {
-					// Assume autoboxing will work.
-					throw new IllegalArgumentException("Incorrect argument type for param " + i + ": expected " + types[i] + "!");
-				}
-			}
-		}
-
-		// MetaDataResult result = (MetaDataResult) method.invoke(proxy, args);
-		return method.invoke(proxy, args);
-
 	}
 
 	public void close() {
