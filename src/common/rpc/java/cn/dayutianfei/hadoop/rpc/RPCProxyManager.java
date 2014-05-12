@@ -13,11 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package iie.dataplatform.rpc.client;
-
-import iie.dataplatform.log.LoggerConfig;
-import iie.dataplatform.rpc.INodeProxyManager;
-import iie.dataplatform.rpc.RPC;
+package cn.dayutianfei.hadoop.rpc;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -26,8 +22,12 @@ import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.ipc.RPC;
+import org.apache.hadoop.ipc.VersionedProtocol;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.HashMultiset;
@@ -38,22 +38,25 @@ import com.google.common.collect.Multiset;
  * function:
  * date    :2012-9-7
  */
-public class MasterProxyManager implements INodeProxyManager {
+public class RPCProxyManager implements IRPCProxyManager {
 
-  private final static Logger LOG = LoggerConfig.getInstance(LoggerConfig.DATAPLATFORM_LOG);
+  private final static Logger LOG = Logger.getLogger(RPCProxyManager.class);
   /**
  * 
  */
-private final Class _serverClass;
+private final Class<? extends VersionedProtocol> _serverClass;
+  private final Configuration _hadoopConf;
   /**
- * 缓存各个master的rpc代理
+ * 缓存节点的rpc代理
  */
-private final Map<String, Object> master2ProxyMap = new ConcurrentHashMap<String, Object>();
+private final Map<String, VersionedProtocol> node2ProxyMap = new ConcurrentHashMap<String, VersionedProtocol>();
   private int _successiveProxyFailuresBeforeReestablishing = 3;
   private final Multiset<String> _failedNodeInteractions = HashMultiset.create();
 
-  public MasterProxyManager(Class serverClass) {
+  public RPCProxyManager(Class<? extends VersionedProtocol> serverClass, Configuration hadoopConf
+         ) {
     _serverClass = serverClass;
+    _hadoopConf = hadoopConf;
   }
 
   /**
@@ -68,25 +71,32 @@ private final Map<String, Object> master2ProxyMap = new ConcurrentHashMap<String
     _successiveProxyFailuresBeforeReestablishing = successiveProxyFailuresBeforeReestablishing;
   }
 
-  public Object createMasterProxy(String hostName,int port) throws IOException {
-    LOG.debug("creating proxy for master: " + hostName);
-    final InetSocketAddress inetSocketAddress = new InetSocketAddress(hostName, port);
-    Object proxy = RPC.getProxy(_serverClass, hostName,port);
+  public VersionedProtocol createProxy(final String nodeName) throws IOException {
+    LOG.debug("creating proxy for master: " + nodeName);
+    String[] hostName_port = nodeName.split(":");
+    if (hostName_port.length != 2) {
+      throw new RuntimeException("invalid node name format '" + nodeName
+              + "' (It should be a host name with a port number devided by a ':')");
+    }
+    final String hostName = hostName_port[0];
+    final String port = hostName_port[1];
+    final InetSocketAddress inetSocketAddress = new InetSocketAddress(hostName, Integer.parseInt(port));
+    VersionedProtocol proxy = RPC.getProxy(_serverClass, 0L, inetSocketAddress, _hadoopConf);
     LOG.debug(String.format("Created a proxy %s for %s:%s %s", Proxy.getInvocationHandler(proxy), hostName, port,
             inetSocketAddress));
-    master2ProxyMap.put(hostName, proxy);
+    node2ProxyMap.put(nodeName, proxy);
+    System.out.println(nodeName);
     return proxy;
   }
 
-  @Override
-  public Object getProxy(String nodeName,int port, boolean establishIfNoExists) {
-	  Object versionedProtocol = master2ProxyMap.get(nodeName);
+  public VersionedProtocol getProxy(String nodeName, boolean establishIfNoExists) {
+    VersionedProtocol versionedProtocol = node2ProxyMap.get(nodeName);
     if (versionedProtocol == null && establishIfNoExists) {
       synchronized (nodeName.intern()) {
-        if (!master2ProxyMap.containsKey(nodeName)) {
+        if (!node2ProxyMap.containsKey(nodeName)) {
           try {
-        	versionedProtocol = createMasterProxy(nodeName,port);
-            master2ProxyMap.put(nodeName, versionedProtocol);
+            versionedProtocol = createProxy(nodeName);
+            node2ProxyMap.put(nodeName, versionedProtocol);
           } catch (Exception e) {
             LOG.warn("Could not create proxy for master '" + nodeName + "' - " + e.getClass().getSimpleName() + ": "
                     + e.getMessage());
@@ -97,7 +107,6 @@ private final Map<String, Object> master2ProxyMap = new ConcurrentHashMap<String
     return versionedProtocol;
   }
   @SuppressWarnings("unchecked")
-  @Override
   public void reportNodeCommunicationFailure(String nodeName, Throwable t) {
     // TODO jz: not sure if there are cases a proxy is getting invalid and
     // re-establishing it would fix the communication. If so, we should check
@@ -125,29 +134,27 @@ private final Map<String, Object> master2ProxyMap = new ConcurrentHashMap<String
 
   private void dropNodeProxy(String nodeName, int failureCount) {
     synchronized (nodeName.intern()) {
-      if (master2ProxyMap.containsKey(nodeName)) {
+      if (node2ProxyMap.containsKey(nodeName)) {
         LOG.warn("removing proxy for node '" + nodeName + "' after " + failureCount + " proxy-invocation errors");
         _failedNodeInteractions.remove(nodeName, Integer.MAX_VALUE);
-        Object proxy = master2ProxyMap.remove(nodeName);
+        VersionedProtocol proxy = node2ProxyMap.remove(nodeName);
         RPC.stopProxy(proxy);
       }
     }
   }
 
-  @Override
   public void reportNodeCommunicationSuccess(String node) {
     _failedNodeInteractions.remove(node, Integer.MAX_VALUE);
   }
 
-  @Override
   public void shutdown() {
-    Collection<Object> proxies = master2ProxyMap.values();
-    for (Object search : proxies) {
+    Collection<VersionedProtocol> proxies = node2ProxyMap.values();
+    for (VersionedProtocol search : proxies) {
       RPC.stopProxy(search);
     }
   }
-  public Collection<Object> getProxys(){
-	  return master2ProxyMap.values();
+  public Collection<VersionedProtocol> getProxys(){
+	  return node2ProxyMap.values();
   }
 
 }

@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package iie.dataplatform.rpc;
+package cn.dayutianfei.hadoop.rpc;
+
+import org.apache.hadoop.ipc.VersionedProtocol;
 
 /**
  * The interaction required between a NodeInteraction and Client.
  */
-public interface INodeProxyManager {
+public interface IRPCProxyManager {
 
   /**
    * Get the dynamic proxy for a node. Methods invoked on this object will be
@@ -29,7 +31,7 @@ public interface INodeProxyManager {
    * @param establishIfNoExists
    * @return a dynamic proxy standing in for the node.
    */
-  public Object getProxy(String node, int port, boolean establishIfNoExists);
+  public VersionedProtocol getProxy(String node, boolean establishIfNoExists);
 
   /**
    * Notifies the proxy-manager that a a proxy invocation failed.

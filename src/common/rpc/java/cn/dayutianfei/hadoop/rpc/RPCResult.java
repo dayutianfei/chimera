@@ -1,4 +1,4 @@
-package iie.dataplatform.rpc;
+package cn.dayutianfei.hadoop.rpc;
 
 import java.io.Serializable;
 
