@@ -1,7 +1,6 @@
 package cn.dayutianfei.common.conf;
 
 import java.io.File;
-import java.io.IOException;
 
 public class ChimeraConstant {
 	public static final String _HOME = "_HOME";
