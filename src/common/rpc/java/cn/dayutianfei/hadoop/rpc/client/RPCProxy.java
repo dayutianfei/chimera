@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package cn.dayutianfei.hadoop.rpc;
+package cn.dayutianfei.hadoop.rpc.client;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.ipc.VersionedProtocol;
 import org.apache.log4j.Logger;
 
 import cn.dayutianfei.common.conf.ChimeraConfiguration;
+import cn.dayutianfei.hadoop.rpc.IRPCHandler;
 
 public class RPCProxy {
 
@@ -33,12 +30,12 @@ public class RPCProxy {
 	private List<String> nodes;
 	private RPCProxyManager proxyManager;
 
-	public RPCProxy(List<String> masterlist, ChimeraConfiguration _clientConfiguration, Configuration hadoopConf)
+	public RPCProxy(List<String> masterlist, ChimeraConfiguration _clientConfiguration, Configuration conf)
 	{
 
 		this.nodes = masterlist;
-		LOG.debug("masters:" + nodes);
-		proxyManager = new RPCProxyManager(IRPCHandler.class, hadoopConf);
+		LOG.debug("nodes:" + nodes);
+		proxyManager = new RPCProxyManager(IRPCHandler.class, conf);
 
 		// 为每个master创建代理
 		boolean createProxyOk = false;

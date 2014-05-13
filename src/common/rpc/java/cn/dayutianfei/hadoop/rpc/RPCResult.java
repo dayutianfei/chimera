@@ -1,31 +1,35 @@
 package cn.dayutianfei.hadoop.rpc;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.io.Serializable;
 
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
+
 	
-public class RPCResult implements Serializable{
+public class RPCResult implements Serializable,Writable{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	boolean isSuccess = false;
 	
-	private String message = "";
+	private Text message = new Text();
 	
 	public String getMessage() {
-		return message;
+		return message.toString();
 	}
 
 	public void setMessage(String message) {
-		this.message = message;
+		this.message = new Text(message);
 	}
 
-	public boolean isSuccess() {
-		return isSuccess;
+	public void readFields(DataInput in) throws IOException {
+		message.readFields(in);
 	}
 
-	public void setSuccess(boolean isSuccess) {
-		this.isSuccess = isSuccess;
+	public void write(DataOutput out) throws IOException {
+		message.write(out);
 	}
-	
 }
