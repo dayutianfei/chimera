@@ -36,7 +36,7 @@ public class RPCProxyManager implements IRPCProxyManager {
 
 	private final static Logger LOG = Logger.getLogger(RPCProxyManager.class);
 	private final Class<? extends VersionedProtocol> _handlerClass;
-	private final Configuration _hadoopConf;
+	private final Configuration _conf;
 	/**
 	 * 缓存节点的rpc代理
 	 */
@@ -48,7 +48,7 @@ public class RPCProxyManager implements IRPCProxyManager {
 	public RPCProxyManager(Class<? extends VersionedProtocol> serverClass,
 			Configuration conf) {
 		_handlerClass = serverClass;
-		_hadoopConf = conf;
+		_conf = conf;
 	}
 
 	/**
@@ -79,7 +79,7 @@ public class RPCProxyManager implements IRPCProxyManager {
 		final InetSocketAddress inetSocketAddress = new InetSocketAddress(
 				hostName, Integer.parseInt(port));
 		VersionedProtocol proxy = RPC.getProxy(_handlerClass, 0L,
-				inetSocketAddress, _hadoopConf);
+				inetSocketAddress, _conf);
 		LOG.debug(String.format("Created a proxy %s for %s:%s %s",
 				Proxy.getInvocationHandler(proxy), hostName, port,
 				inetSocketAddress));

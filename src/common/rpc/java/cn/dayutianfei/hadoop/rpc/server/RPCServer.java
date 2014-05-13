@@ -33,7 +33,6 @@ public class RPCServer {
 	protected final static Logger LOG = Logger.getLogger(RPCServer.class);
 
 	private String _nodeName;
-
 	private int _rpcServerport;
 	private int _rpcHandlerCount;
 	private Server _rpcServer;
@@ -44,9 +43,9 @@ public class RPCServer {
 
 	public RPCServer(ChimeraConfiguration configuration)
 			throws FileNotFoundException, UnknownHostException {
-		_nodeName = "localhost" + ":" + "8082";
 		this._rpcServerport = 8082;
 		this._rpcHandlerCount = 20;
+		_nodeName = "localhost" + ":" + _rpcServerport;
 	}
 
 	public synchronized void start() {
