@@ -22,7 +22,6 @@ public class NodeConfiguration extends ChimeraConfiguration {
 	// search
 	public final static String NODE_RPC_PORT = "node.rpc.port";
 	public final static String SEARCH_NODE_RPC_HANDLER_COUNT = "node.rpc.handler.count";
-	private static final String SERVER_CLASS = "node.server.class";
 	private static final String MAXSHARD_NUM = "node.maxshard.num";
 	private static final String MAXRECORD_NUM = "node.default.maxRecords";
 	public final static String META_URI = "meta.uri";

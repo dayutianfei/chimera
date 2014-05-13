@@ -18,7 +18,6 @@ package cn.dayutianfei.hadoop.rpc.client;
 import java.lang.reflect.Method;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.MapWritable;
 import org.apache.log4j.Logger;
 
 import cn.dayutianfei.hadoop.rpc.IRPCHandler;
