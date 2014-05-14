@@ -124,8 +124,9 @@ public class RPCProxyManager implements IRPCProxyManager {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean exceptionContains(Throwable t,
-			Class<? extends Throwable>... exceptionClasses) {
+			 Class<? extends Throwable>... exceptionClasses) {
 		while (t != null) {
 			for (Class<? extends Throwable> exceptionClass : exceptionClasses) {
 				if (t.getClass().equals(exceptionClass)) {
