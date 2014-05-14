@@ -19,15 +19,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.UnknownHostException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.ipc.RPC.Server;
-import org.apache.hadoop.net.NetUtils;
 import org.apache.log4j.Logger;
-
 import cn.dayutianfei.common.conf.ChimeraConfiguration;
-import cn.dayutianfei.common.util.ClassUtil;
 import cn.dayutianfei.hadoop.rpc.IRPCHandler;
 
 import com.google.common.base.Preconditions;
@@ -37,9 +33,6 @@ public class RPCServer {
 	protected final static Logger LOG = Logger.getLogger(RPCServer.class);
 
 	private String _nodeName;
-
-	//
-//	private long _safeModeMaxTime;
 	private int _rpcServerport;
 	private int _rpcHandlerCount;
 	private Server _rpcServer;
@@ -48,11 +41,11 @@ public class RPCServer {
 		this(new ChimeraConfiguration());
 	}
 
-	public RPCServer(ChimeraConfiguration configuration) throws FileNotFoundException, UnknownHostException {
-		_nodeName = "localhost" + ":" + "8080";
-		System.out.println(_nodeName);
-		this._rpcServerport = 8080;
-		this._rpcHandlerCount= 20;
+	public RPCServer(ChimeraConfiguration configuration)
+			throws FileNotFoundException, UnknownHostException {
+		this._rpcServerport = 8082;
+		this._rpcHandlerCount = 20;
+		_nodeName = "localhost" + ":" + _rpcServerport;
 	}
 
 	public synchronized void start() {
@@ -67,13 +60,11 @@ public class RPCServer {
 		}
 
 		try {
-			// start RPC Server
-			Class<?> serverClass = ClassUtil.forName("cn.dayutianfei.hadoop.rpc.server.RPCHandler", IRPCHandler.class);// iie.mdss.server.master.MasterRpcServer
-			IRPCHandler _handler = (IRPCHandler) ClassUtil.newInstance(serverClass);
-
-			LOG.info("starting rpc server with server class = " + _handler.getClass().getCanonicalName());
-
-			this._rpcServer = startRPCServer("localhost", this._rpcServerport, _handler, _rpcHandlerCount);
+			IRPCHandler _handler = new RPCHandler();
+			LOG.info("starting rpc server with server class = "
+					+ _handler.getClass().getCanonicalName());
+			this._rpcServer = startRPCServer("localhost", this._rpcServerport,
+					_handler, _rpcHandlerCount);
 		} catch (Exception e) {
 			LOG.error("error", e);
 		}
@@ -87,49 +78,32 @@ public class RPCServer {
 		return _nodeName;
 	}
 
-	/***
-	 * 函数：startNodeManagement。 添加监听器
-	 * 
-	 * 
-	 * private void startNodeManagement() { LOG.info("start managing nodes...");
-	 * List<String> nodes = _protocol.registerChildListener(this,
-	 * PathDef.NODES_LIVE, new IAddRemoveListener() {
-	 * 
-	 * @Override public void removed(String name) { synchronized (Master.this) {
-	 *           if (!isInSafeMode()) { _protocol.addMasterOperation(new
-	 *           CheckIndicesOperation()); } } }
-	 * @Override public void added(String name) { synchronized (Master.this) {
-	 *           if (!isMaster()) { return; } _protocol.addMasterOperation(new
-	 *           RemoveObsoleteShardsOperation(name)); if (!isInSafeMode()) {
-	 *           _protocol.addMasterOperation(new CheckIndicesOperation()); } }
-	 *           } }); _protocol.addMasterOperation(new
-	 *           CheckIndicesOperation()); for (String node : nodes) {
-	 *           _protocol.addMasterOperation(new
-	 *           RemoveObsoleteShardsOperation(node)); }
-	 * 
-	 *           LOG.info("found following nodes connected: " + nodes); }
-	 */
 	public synchronized void shutdown() {
 		this._rpcServer.stop();
 	}
 
 	@SuppressWarnings("deprecation")
-	private static Server startRPCServer(String hostName, final int startPort, IRPCHandler handler, int handlerCount) {
+	private static Server startRPCServer(String hostName, final int startPort,
+			IRPCHandler handler, int handlerCount) {
 		int serverPort = startPort;
 		int tryCount = 10000;
+		int triedTimes = 0;
 		Server _rpcServer = null;
 		while (_rpcServer == null) {
 			try {
-				LOG.info("start rpc server,host:" + hostName + ",port:" + serverPort);
-				_rpcServer = RPC.getServer(handler, "0.0.0.0", serverPort, handlerCount, false, new Configuration());
-				LOG.info(handler.getClass().getSimpleName() + " server started on : " + hostName + ":" + serverPort);
+				LOG.info("start rpc server,host:" + hostName + ",port:"
+						+ serverPort);
+				_rpcServer = RPC.getServer(handler, "0.0.0.0", serverPort,
+						handlerCount, false, new Configuration());
+				LOG.info(handler.getClass().getSimpleName()
+						+ " server started on : " + hostName + ":" + serverPort);
 				break;
 			} catch (final BindException e) {
-				if (serverPort - startPort < tryCount) {
-					serverPort++;
-					// try again
+				if (triedTimes < tryCount) {
+					triedTimes++;
 				} else {
-					throw new RuntimeException("tried " + tryCount + " ports and no one is free...");
+					throw new RuntimeException("tried " + tryCount
+							+ " ports and no one is free...");
 				}
 			} catch (final IOException e) {
 				throw new RuntimeException("unable to create rpc server", e);

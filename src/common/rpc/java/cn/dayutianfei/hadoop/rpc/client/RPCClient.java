@@ -15,24 +15,12 @@
  */
 package cn.dayutianfei.hadoop.rpc.client;
 
-
 import java.lang.reflect.Method;
-import java.util.List;
-//import java.util.List;
-
-
-
-
-
-
-
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 
-import cn.dayutianfei.common.conf.ChimeraConfiguration;
 import cn.dayutianfei.hadoop.rpc.IRPCHandler;
-import cn.dayutianfei.hadoop.rpc.RPCProxyManager;
 import cn.dayutianfei.hadoop.rpc.RPCResult;
 
 /**
@@ -42,29 +30,28 @@ import cn.dayutianfei.hadoop.rpc.RPCResult;
  */
 public class RPCClient {
 
-	protected final static Logger logger = Logger
-			.getLogger(RPCClient.class);
+	protected final static Logger logger = Logger.getLogger(RPCClient.class);
 	private RPCProxyManager nodeProxyManager;
 	private static Method GetThings_METHOD = null;
 	private static Method GetThingsResult_METHOD = null;
 
 	static {
 		try {
-			GetThings_METHOD = IRPCHandler.class.getMethod(
-					"getThings", new Class[] { String.class,String.class });
+			GetThings_METHOD = IRPCHandler.class.getMethod("getThings",
+					new Class[] { String.class, String.class });
 			GetThingsResult_METHOD = IRPCHandler.class.getMethod(
 					"getThingsResult", new Class[] { String.class });
 		} catch (NoSuchMethodException e) {
-			throw new RuntimeException(
-				"Could not find methods in IMetaDataServer!");
+			throw new RuntimeException("Could not find methods in IRPCHandler!");
 		}
 	}
 
 	public RPCClient(String node, int port) throws Exception {
-		nodeProxyManager = new RPCProxyManager(IRPCHandler.class, new Configuration());
+		nodeProxyManager = new RPCProxyManager(IRPCHandler.class,
+				new Configuration());
 		// 为每个master创建代理
 		boolean createProxyOk = false;
-		nodeProxyManager.createProxy(node+":"+port);
+		nodeProxyManager.createProxy(node + ":" + port);
 		createProxyOk = true;
 		if (!createProxyOk) {
 			logger.info("Create node proxy false");
@@ -74,12 +61,13 @@ public class RPCClient {
 
 	/**
 	 * 执行master中的方法.
+	 * 
 	 * @param method
 	 * @param args
 	 * @return
 	 * @throws Exception
 	 */
-	public RPCResult broadtoMaster(Method method, Object... args)
+	public Object broadtoMaster(Method method, Object... args)
 			throws Exception {
 
 		Object proxy = null;
@@ -90,7 +78,7 @@ public class RPCClient {
 			}
 		}
 		if (proxy == null) {
-			throw new Exception("no master is availiable");
+			throw new Exception("no proxy is availiable");
 		}
 		if (method == null || args == null) {
 			throw new IllegalArgumentException("Null method or args!");
@@ -114,21 +102,22 @@ public class RPCClient {
 				}
 			}
 		}
-		RPCResult result = (RPCResult) method.invoke(proxy, args);
-		return result;
+		//RPCResult result = (RPCResult) 
+		return method.invoke(proxy, args);
 	}
 
 	public void close() {
 		nodeProxyManager.shutdown();
 	}
 
-	public RPCResult getThings(String nodeName,String node) throws Exception {
-		RPCResult re = (RPCResult)broadtoMaster(GetThings_METHOD, nodeName, node);
+	public RPCResult getThings(String arg1, String arg2) throws Exception {
+		RPCResult re = (RPCResult) broadtoMaster(GetThings_METHOD, arg1,arg2);
 		return re;
 	}
-	
+
 	public String getThingsResult(String nodeName) throws Exception {
-		RPCResult re = (RPCResult)broadtoMaster(GetThingsResult_METHOD, nodeName);
+		RPCResult re = (RPCResult) broadtoMaster(GetThingsResult_METHOD,
+				nodeName);
 		return re.getMessage();
 	}
 }
